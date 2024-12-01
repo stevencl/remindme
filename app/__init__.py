@@ -3,6 +3,7 @@ print("app/__init__.py loaded!")
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate
 from dotenv import load_dotenv
 import os
 from flask import request
@@ -12,6 +13,7 @@ load_dotenv()
 
 db = SQLAlchemy()
 jwt = JWTManager()
+migrate = Migrate()
 
 @jwt.user_identity_loader
 def user_identity_lookup(user):
@@ -29,7 +31,6 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'  # Use SQLite for simplicity
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['JWT_SECRET_KEY'] = os.getenv("SECRET_KEY")
-    # app/__init__.py
     app.config['JWT_TOKEN_LOCATION'] = ['headers']  # Default is cookies; we set it to headers
     app.config['JWT_COOKIE_CSRF_PROTECT'] = False   # Disable CSRF protection for cookies
     app.config['JWT_ALGORITHM'] = 'HS256'
@@ -37,9 +38,9 @@ def create_app():
     app.config['DEBUG'] = True  # Enables Flask debugging
     app.config['ENV'] = 'development'  # Sets development mode
 
-
     db.init_app(app)
     jwt.init_app(app)
+    migrate.init_app(app, db)
 
     from .routes import main
     app.register_blueprint(main)
