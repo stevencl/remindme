@@ -13,3 +13,10 @@ class Note(db.Model):
     deadline = db.Column(db.String(50), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', backref=db.backref('notes', lazy=True))
+    entities = db.relationship('Entity', backref='note', lazy=True)
+
+class Entity(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    note_id = db.Column(db.Integer, db.ForeignKey('note.id'), nullable=False)
+    text = db.Column(db.String(100), nullable=False)
+    label = db.Column(db.String(50), nullable=False)

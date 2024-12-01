@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from . import db
-from .models import User, Note
+from .models import User, Note, Entity
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
@@ -77,6 +77,13 @@ def add_note():
         # Add note to database
         note = Note(user_id=user_id, content=content, deadline=deadline)
         db.session.add(note)
+        db.session.commit()
+
+        # Add entities to database
+        for text, label in entities:
+            entity = Entity(note_id=note.id, text=text, label=label)
+            db.session.add(entity)
+        
         db.session.commit()
 
         return jsonify({"message": "Note added successfully", "entities": entities}), 201
